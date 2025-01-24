@@ -1,0 +1,907 @@
+---
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document: default
+fontsize: 9pt
+linestretch: 0.8
+geometry: margin=0.5in
+header-includes:
+  - \usepackage{xcolor}
+  - \usepackage{booktabs}
+---
+\begin{center}
+\LARGE \textbf{Projet économétrie}
+
+\large Karim Hajji et Nour Mahfoudhi
+\end{center}
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=4, fig.height=3)
+```
+
+
+# \textcolor{purple}{Introduction} :
+
+L’analyse des séries temporelles est un outil central en économétrie pour explorer les interactions entre des variables économiques et financières dans le temps. Ce projet s’intéresse aux relations dynamiques entre deux actifs clés des marchés financiers : le prix de l’or (Gold Prices en USD) et l’indice S&P 500 (en USD). L’objectif principal est de comprendre si l’or peut être considéré comme une solution pour préserver la valeur des investissements lorsque les marchés boursiers, comme le S&P 500, connaissent une instabilité, et comment ces deux séries interagissent sur différentes périodes économiques.
+
+Ce choix s’appuie sur des considérations pratiques et théoriques. En tant qu’étudiants en finance, ces actifs représentent des concepts fondamentaux :
+1. L’or est souvent considéré comme un actif sécurisé ou "refuge",
+utilisé pour protéger la valeur des portefeuilles en période de crise. Les investisseurs y ont recours lorsqu’ils anticipent une baisse des marchés financiers.
+2. Le S&P 500, en revanche, est un indicateur majeur de la performance économique et de la confiance des investisseurs. Sa volatilité reflète les attentes vis-à-vis de la croissance économique et des risques macroéconomiques.
+
+Cette étude est particulièrement pertinente pour nous, étudiants en finance, pour deux raisons principales. Premièrement, en tant que futurs professionnels travaillant dans des banques, sociétés de gestion ou institutions financières, il est essentiel de comprendre les interactions entre ces actifs pour conseiller efficacement les clients, gérer des portefeuilles et anticiper les réactions des marchés face aux crises économiques. Deuxièmement, en tant que futurs investisseurs et épargnants, nous devons savoir comment préserver ou faire fructifier nos économies. Comprendre le rôle de l’or comme refuge ou celui des actions comme opportunité de croissance en fonction des conditions de marché est crucial pour prendre des décisions éclairées, en particulier en période d’instabilité économique.
+
+Ce projet permettra d’analyser les interactions entre le prix de l’or et le S&P 500, notamment en période de crise, afin de comprendre leur comportement respectif et leurs implications pratiques pour les investisseurs et les gestionnaires de portefeuille.
+
+### \textcolor{black}{Méthodologie et données} :
+
+Les données utilisées dans cette étude consistent en des observations mensuelles couvrant la période allant de janvier 2000 à décembre 2019, soit un total de 240 observations pour chaque série. Elles ont été extraites de la base de données DBnomics. Ces séries ont été choisies pour leur disponibilité sur une longue période, leur pertinence économique et leur fréquence commune, ce qui garantit une cohérence dans l’analyse.
+
+Cette période a été retenue car elle inclut plusieurs événements économiques significatifs tels que la crise financière mondiale de 2008, suivie par une reprise progressive des marchés dans les années suivantes. Cette période permet d’analyser les dynamiques entre l’or et le S&P 500 dans des contextes variés, incluant des périodes de crise, de stabilisation et de croissance économique. L’exclusion des données post-2019 vise à éviter les distorsions liées à la crise sanitaire de la COVID-19, qui a entraîné des comportements atypiques sur les marchés financiers, et garantit une analyse basée sur des dynamiques économiques normales.
+
+D'une part, nous appliquerons une approche univariée pour analyser chaque série séparément (prix de l’or et indice S&P 500). Nous commencerons par une exploration visuelle des séries pour identifier les tendances, les ruptures ou les périodes de volatilité. Nous calculerons les autocorrélogrammes simples (ACF) et partiels (PACF) pour détecter les dépendances temporelles. Ensuite, nous vérifierons la stationnarité de chaque série à l'aide du test de Dickey-Fuller augmenté (ADF). Si nécessaire, des transformations seront effectuées pour rendre les séries stationnaires. Une fois les séries stationnarisées, nous identifierons le modèle ARMA optimal pour l'une des deux séries, en nous appuyant sur des critères comme l’AIC ou le BIC pour sélectionner le modèle le plus adapté. Ce modèle sera ensuite utilisé pour effectuer des prévisions sur des horizons de 1 à 3 mois, en tenant compte des propriétés de la série initiale.
+
+D'autre part, nous adopterons une approche multivariée pour examiner les interactions entre le prix de l’or et le S&P 500 via un modèle VAR. Nous déterminerons le nombre de retards optimal pour le modèle en utilisant des critères comme l’AIC et le BIC. Ensuite, nous réaliserons des tests de causalité de Granger pour explorer si les variations d’une série permettent de prédire celles de l’autre. Nous effectuerons une analyse impulsion-réponse pour mesurer l’effet d’un choc exogène sur une série (par exemple, une baisse du S&P 500) sur l’autre (le prix de l’or). Enfin, un test de cointégration de Johansen sera mené pour vérifier si une relation à long terme existe entre ces deux séries. En cas de cointégration, un modèle VECM sera estimé pour capturer les dynamiques à court et long terme entre ces variables.
+
+
+### \textcolor{black}{Hypothèses de recherche et résultats attendus} :
+
+Impact du S&P 500 sur le prix de l’or : Nous pensons qu’une baisse du S&P 500 entraînera une hausse du prix de l’or, car l’or est souvent utilisé par les investisseurs pour protéger leur capital en période de crise. Ce résultat confirmerait que l’or agit comme un refuge face à la volatilité des marchés boursiers.
+
+Impact du prix de l’or sur le S&P 500 : Une augmentation du prix de l’or pourrait refléter une anticipation de risques économiques par les investisseurs, ce qui pourrait peser sur la confiance dans les marchés actions représentés par le S&P 500.
+
+Relation entre l’or et le S&P 500 : Nous nous attendons à une relation négative entre l’or et le S&P 500 en période de crise. En revanche, cette relation pourrait être neutre ou légèrement positive en période de stabilité économique, lorsque les investisseurs ne recherchent pas de refuge particulier.
+
+Causalité entre les deux variables : Nous supposons que les variations du S&P 500 influenceront davantage les prix de l’or que l’inverse, car les investisseurs réagissent d’abord aux mouvements des marchés boursiers.
+
+La comparaison des résultats obtenus avec ces hypothèses permettra de tester la robustesse de nos hypothèses de départ et d’affiner notre compréhension des interactions entre le prix de l’or et le S&P 500. Les interprétations des résultats éclaireront les implications pratiques pour les investisseurs et gestionnaires de fonds, en particulier dans la gestion des risques et l’allocation stratégique des portefeuilles.
+
+\section*{\textbf{\textcolor{blue}{Modélisation univariée}}}
+
+
+
+## \textcolor{purple}{Représentations graphiques et autocorrélogrammes simples et partiels des séries}
+
+```{r, include=FALSE}
+library(urca)
+library(readxl)
+library(forecast)
+library("writexl")
+library(lmtest)
+library(zoo)
+library(FinTS)
+library(tseries)
+library(vars)
+library(lpirfs)
+base <- read_excel("Base_HAJJI_MAHFOUDHI.xlsx")
+names(base) <- c("period", "gold_prices", "SP500")
+base1 <- subset(base, period >= "2000-01" & period <= "2019-12")
+anyNA(base1)
+```
+```{r, include=FALSE}
+gold_prices <- ts(
+  base1$gold_prices,
+  frequency = 12, start = c(2000, 1)
+)
+lgold_prices <- log(gold_prices)
+```
+
+###### \textbf{Le prix de l'or en log}
+```{r}
+plot(
+  lgold_prices, frame = FALSE, col = 'red',
+  main = "Prix de l'or en Log", xlab = 'Temps'
+)
+```
+
+###### \textcolor{purple}{Commentaire} :
+L’analyse du graphique du prix de l'or en log montre une trajectoire non stationnaire, ce qui implique que les propriétés statistiques de la série, comme la moyenne et la variance ne sont pas constantes dans le temps. Une transformation de la série pourrait donc s'avérer indispensable pour stabiliser ses propriétés statistiques et permettre une analyse plus fiable des interactions entre le prix de l'or et le S&P 500.
+
+###### \textbf{Autocorrélation simple et partielle}
+```{r, fig.width=10, fig.height=3, out.width='100%', fig.align='center'}
+par(mfrow = c(1, 2))
+acf(lgold_prices, lag.max = 20, col = 'blue')
+pacf(lgold_prices, lag.max = 20, col = 'green')
+par(mfrow = c(1, 1))
+```
+
+###### \textcolor{purple}{Commentaire} :
+La décroissance très lente de l’autocorrélation simple (ACF) observée dans le graphique est un indicateur clair de la non-stationnarité de la série log_gold_prices. En effet, les autocorrélations restent significatives sur plusieurs lags, suggérant une forte dépendance temporelle. Du côté de l’autocorrélation partielle (PACF), seule la première observation est clairement significative, ce qui indique que les dépendances temporelles immédiates sont bien capturées par un modèle autorégressif simple. Ainsi, un modèle AR(1) avec différenciation pourrait être particulièrement adapté pour modéliser la série.
+
+```{r, include=FALSE}
+SP500 <- ts(
+  base1$SP500,
+  frequency = 12, start = c(2000, 1)
+)
+lSP500 <- log(SP500)
+```
+
+###### \textbf{Le SP 500 en log}
+```{r}
+plot(
+  lSP500, frame = FALSE, col = 'red',
+  main = "Indice SP 500 en Log", xlab = 'Temps'
+)
+```
+
+\textcolor{purple}{Commentaire} : L’analyse du graphique de l'indice SP 500 en log montre également une trajectoire non stationnaire, ce qui indique que la moyenne et la variance de la série ne sont pas constantes dans le temps. Une transformation supplémentaire, comme la différenciation, pourrait être nécessaire pour stabiliser la série avant d’appliquer un modèle économétrique.
+
+###### \textbf{Autocorrélation simple et partielle}
+```{r, fig.width=10, fig.height=3, out.width='100%', fig.align='center'}
+par(mfrow = c(1, 2))
+acf(lSP500, lag.max = 20, col = 'blue')
+pacf(lSP500, lag.max = 20, col = 'green')
+par(mfrow = c(1, 1))
+```
+
+\textcolor{purple}{Commentaire} :
+La décroissance lente de l’autocorrélation (ACF) pour la série SP 500 en log indique une dépendance temporelle persistante, signe de non-stationnarité. De plus, l'autocorrélation partielle (PACF) montre une significativité principalement au premier lag, ce qui suggère qu’un modèle AR(1) avec différenciation pourrait être approprié pour rendre cette série stationnaire.
+
+
+# \textcolor{purple}{Evaluation de la stationnarité}
+Appliquons à présent la stratégie de test de racine unitaire à chacune des séries avec deux tests : Le test de Dickey Fuller augmenté et le test KPSS. Ces tests nous permettront de détecter la présence éventuelle d'une racine unitaire, et ainsi d'évaluer si nos séries sont stationnaires ou non.
+
+### \textbf{Test de Dickey Fuller Augmenté (ADF)}
+
+Le test de Dickey-Fuller augmenté est défini comme suit :
+$$
+\begin{cases}
+H_0 : \rho = 0 \implies X_t \text{ non stationnaire} \\
+H_1 : \rho < 0 \implies X_t \text{ stationnaire}
+\end{cases}
+$$
+## Test de Dicky Fuller pour la série "gold_prices"
+Afin de mettre en oeuvre les tests de racines unitaires, on procède à une stratégie séquentielle de test : d'abord on teste à la fois la constante et la tendance dans le modèle le plus général (Modèle 3). Ensuite, nous évaluons la pertinence de ce modèle. Si ce modèle ne se révèle pas approprié, nous recommençons le test en utilisant un modèle plus restreint, jusqu'à ce que le modèle optimal soit identifié.
+
+Le nombre de retards est fixé à 6 car nos données sont mensuelles et le nombre de retards optimal est déterminé par la minimisation du critère AIC.
+
+Modèle 3 : 
+$$
+\Delta X_t = c + b t + \rho X_{t-1} + \sum_{j=1}^{p} \delta_j \Delta X_{t-j} + \varepsilon_t
+$$
+```{r}
+test_M3_gold_prices <- ur.df(y = lgold_prices, type = 'trend', lags = 6, selectlags = 'AIC')
+coefficients(test_M3_gold_prices@testreg)
+print(test_M3_gold_prices@cval)
+```
+
+###### \textcolor{purple}{Commentaire} :
+D'après les résultats du test de Dickey-Fuller appliqué à notre série, avec un niveau de signification fixé à 5%, on trouve $t_{\text{ADF}} = -0.823$, tandis que la valeur critique à 5% est de -3.43. Donc $t_{\text{ADF}} > -3.43$. Comme la statistique de test est supérieure à cette valeur critique, nous ne pouvons pas rejeter l'hypothèse nulle selon laquelle la série possède une racine unitaire. On a donc une racine unitaire.
+
+#### \textbf{Test du coefficient b (la tendance)}
+On teste la valeur du coefficient $b$ avec les hypothèses suivantes :
+
+$$
+\begin{cases}
+H_0 : b = 0 \quad (\text{le coefficient n'est pas significatif}) \\
+H_1 : b \neq 0 \quad (\text{le coefficient est significatif})
+\end{cases}
+$$
+
+La valeur de la statistique de test est $|\hat{t}_{b}| = 0.088$. Comme précédemment la racine unitaire n'a pas été rejetée, nous regardons la valeur critique dans les tables de Dickey Fuller pour le modèle 3 (250 observations) qui vaut 3,12. Comme $\hat{t}_{b} < 3.14$ au seuil 5%, nous ne pouvons pas rejeter l'hypothèse nulle $H_0$. Cela signifie que le coefficient $b$ n'est pas significatif dans notre modèle, il vaut 0.
+
+
+Considérons à présent un modèle plus contraint sans la tendance mais que la constante.
+
+Modèle 2 : 
+$$
+\Delta X_t = c + \rho X_{t-1} + \sum_{j=1}^{p} \delta_j \Delta X_{t-j} + \varepsilon_t
+$$
+
+```{r}
+test_M2_gold_prices <- ur.df(y = lgold_prices, type = 'drift', lags = 6, selectlags = 'AIC')
+coefficients(test_M2_gold_prices@testreg)
+print(test_M2_gold_prices@cval)
+```
+
+###### \textcolor{purple}{Commentaire} :
+
+La statistique de test obtenue est $t_{\text{ADF}} = -1.601$, tandis que la valeur critique à 5% est de -2.88. Comme , $t_{\text{ADF}} > -2.88$,nous ne pouvons pas rejeter l'hypothèse nulle selon laquelle la série possède une racine unitaire. En d'autres termes, le test indique que la série possède une racine unitaire.
+
+### \textbf{Test du coefficient c (la constante)}
+
+On teste la valeur du coefficient $c$ :
+
+$$
+\begin{cases}
+H_0 : c = 0 \\
+H_1 : c \neq 0
+\end{cases}
+$$
+
+La valeur de la statistique de test est $|\hat{t}_{c}| = 1.837$. Comme précédemment la racine unitaire n'a pas été rejetée, nous regardons la valeur critique dans la table de Dickey Fuller (250 observations) qui vaut 2.84. Comme $\hat{t}_{c} < 2.84$ au seuil 5%, nous ne pouvons pas rejeter l'hypothèse nulle $H_0$. Cela signifie que le coefficient $c$ n'est pas significatif dans notre modèle 2 puisque c=0.
+
+Considérons un modèle plus contraint sans tendance ni constante :
+
+Modèle 1 :
+$$
+\Delta X_t = \rho X_{t-1} + \sum_{j=1}^{p} \delta_j \Delta X_{t-j} + \varepsilon_t
+$$
+
+```{r}
+test_M1_gold_prices <- ur.df(y = lgold_prices, type = 'none', lags = 6, selectlags = 'AIC')
+coefficients(test_M1_gold_prices@testreg)
+print(test_M1_gold_prices@cval)
+```
+###### \textcolor{purple}{Commentaire} :
+
+D'après les résultats du test de Dickey-Fuller appliqué à notre série, avec un niveau de significativité fixé à 5%, on trouve $t_{\text{ADF}} = 2.499$, tandis que la valeur critique à 5% est de -1.95. Donc $t_{\text{ADF}} > -1.95$. Comme la statistique de test est supérieure à cette valeur critique, nous ne pouvons pas rejeter l'hypothèse nulle selon laquelle la série possède une racine unitaire au seuil de 5%. On a donc la présence d'une racine unitaire puisque l'hypothèse nulle a été acceptée.
+
+La stratégie séquentielle s'arrête ici et on conclut à un processus intégré \textbf{I(1)}.
+Notre processus associé à la série gold_prices n'est donc pas stationnaire. Il correspond à un processus DS (Differency Stationary). Pour le stationnariser il faudra donc le différencier une fois.
+
+
+## Test de Dicky Fuller pour la série "SP500"
+
+Modèle 3 :
+```{r}
+test_M3_SP500 <- ur.df(y = lSP500, type = 'trend', lags = 6, selectlags = 'AIC')
+coefficients(test_M3_SP500@testreg)
+print(test_M3_SP500@cval)
+```
+
+###### \textcolor{purple}{Commentaire} :
+
+D'après les résultats du test de Dickey-Fuller appliqué à notre série, avec un niveau de significativité fixé à 5%, la statistique de test obtenue est $t_{\text{ADF}} = -2.495$, tandis que la valeur critique à 5% est de -3.43. Comme $t_{\text{ADF}} > -3.43$, nous ne pouvons pas rejeter l'hypothèse nulle selon laquelle la série possède une racine unitaire. 
+
+### \textbf{Test du coefficient b (la tendance)}
+
+On teste la valeur du coefficient $b$ avec les hypothèses suivantes :
+
+$$
+\begin{cases}
+H_0 : b = 0 \quad (\text{le coefficient n'est pas significatif}) \\
+H_1 : b \neq 0 \quad (\text{le coefficient est significatif})
+\end{cases}
+$$
+
+La valeur calculée de la statistique de test est $|\hat{t}_{b}| = 3.118$. Comme précédemment, la racine unitaire n'a pas été rejetée, nous regardons la valeur critique dans les tables de Dickey-Fuller pour le modèle 3, qui vaut 3.12. Comme $\hat{t}_{b} < 3.12$ au seuil de 5%, nous ne pouvons pas rejeter l'hypothèse nulle $H_0$. Cela signifie que le coefficient $b$ n'est pas significatif dans notre modèle et vaut 0.
+
+
+Considérons à présent un modèle plus contraint.
+
+Modèle 2 :
+```{r}
+test_M2_SP500 <- ur.df(y = lSP500, type = 'drift', lags = 6, selectlags = 'AIC')
+coefficients(test_M2_SP500@testreg)
+print(test_M2_SP500@cval)
+```
+
+###### \textcolor{purple}{Commentaire} :
+
+La statistique de test obtenue est $t_{\text{ADF}} = 0.087$, tandis que la valeur critique à 5% est de -2.88. Comme $t_{\text{ADF}} > -2.88$, nous ne pouvons pas rejeter l'hypothèse nulle selon laquelle la série possède une racine unitaire. En d'autres termes, le test indique que la série possède une racine unitaire dans le modèle 2.
+
+#### \textbf{Test du coefficient c (la constante)}
+
+On teste la valeur du coefficient $c$ :
+$$
+\begin{cases}
+H_0 : c = 0 \\
+H_1 : c \neq 0
+\end{cases}
+$$
+La valeur de la statistique de test est $|\hat{t}_{c}| = 0.042$. Comme précédemment, la racine unitaire n'a pas été rejetée, nous regardons la valeur critique sur la table de Dickey Fuller, qui vaut 2,86. Comme $\hat{t}_{c} < 2.84$ au seuil de 5%, nous ne pouvons pas rejeter l'hypothèse nulle $H_0$ donc c vaut 0.
+
+Considérons un modèle plus contraint sans tendance ni constante :
+
+Modèle 1 :
+```{r}
+test_M1_SP500 <- ur.df(y = lSP500, type = 'none', lags = 6, selectlags = 'AIC')
+coefficients(test_M1_SP500@testreg)
+print(test_M1_SP500@cval)
+```
+###### \textcolor{purple}{Commentaire} :
+
+D'après les résultats du test de Dickey-Fuller appliqué à notre série, avec un niveau de significativité fixé à 5%, on trouve $t_{\text{ADF}} = 1.012$, tandis que la valeur critique à 5% est de -1.95. Donc $t_{\text{ADF}} > -1.95$. Comme la statistique de test est supérieure à cette valeur critique, nous ne pouvons pas rejeter l'hypothèse nulle selon laquelle la série possède une racine unitaire au seuil de 5%. On a donc la présence d'une racine unitaire puisque l'hypothèse nulle a été acceptée.
+
+La stratégie séquentielle s'arrête ici (au modèle 1) et on conclut à un processus intégré \textbf{I(1)}.
+Notre processus associé à la série SP 500  n'est donc pas stationnaire. Il correspond à un processus DS (Differency Stationary). Pour le stationnariser il faudra de même le différencier.
+
+
+Effectuons à présent un test KPSS sur les modèles :
+
+### \textbf{Test de stationnarité de KPSS}
+Le test KPSS ne peut être fait que dans le modèle M2 qui est le modèle le plus proche du M1 retenu précédemment dans les stratégies séquentielles.
+Dans ce test, l'hypothèse nulle est que la série est stationnaire autour d'une constante.
+
+Le test KPSS est défini comme suit :
+$$
+\begin{cases}
+H_0 :  X_t \text{ stationnaire} \\
+H_1 :  X_t \text{ non stationnaire}
+\end{cases}
+$$
+## Test KPSS pour la série "log_gold_prices"
+
+```{r}
+kpssM2_gold_prices <- ur.kpss(y=lgold_prices,type="mu",lags="long")
+show(kpssM2_gold_prices)
+print(kpssM2_gold_prices@cval)
+```
+###### \textcolor{purple}{Commentaire} :
+D'après les résultats du test de KPSS appliqué au modèle 2, avec un niveau de significativité fixé à 5%, on trouve $LM_{\text{obs}}=1.4528$, tandis que la valeur critique à 5% est de 0.463. Donc $LM_{\text{obs}} > 0.463$. Comme la statistique de test est supérieure à cette valeur critique, rejet de l'hypothèse nulle de stationnarité au seuil 5%. Le processus est I(1).
+
+## Test KPSS pour la série "log_SP500"
+```{r}
+kpssM2_SP500 <- ur.kpss(y=lSP500,type="mu",lags="long")
+show(kpssM2_SP500)
+print(kpssM2_SP500@cval)
+```
+###### \textcolor{purple}{Commentaire} :
+D'après les résultats du test de KPSS appliqué au modèle 2, avec un niveau de significativité fixé à 5%, on trouve $LM_{\text{obs}}=1.2429$, tandis que la valeur critique à 5% est de 0.463. Donc $LM_{\text{obs}} > 0.463$. Comme la statistique de test est supérieure à cette valeur critique, rejet de l'hypothèse nulle de stationnarité au seuil 5%. Le processus est I(1).
+
+## Conclusion
+Les résultats des tests ADF nous amènent à conclure que le le prix de l'or (en log) des Etats-Unis et le SP 500 (en log) sont des séries DS sans tendance ni constante. On dit aussi qu'elles sont des processus DS sans dérive.
+Ainsi, on doit les différencier pour les stationnariser car ce sont des processus DS. 
+
+
+## Stationnarisation de nos deux séries"
+```{r, fig.width=10, fig.height=3, out.width='100%', fig.align='center'}
+dlgold_prices <- diff(lgold_prices)
+par(mfrow = c(1, 2))
+plot(dlgold_prices, main="Croissance du prix de l'or",frame=F,xlab="temps",ylab="croissance du prix de l'or",col="red")
+dlSP500 <- diff(lSP500)
+plot(dlSP500, main="Croissance du SP 500",frame=F,xlab="temps",ylab="croissance du SP 500",col="red")
+```
+
+## Estimation de la série gold_prices, tests de validation et prévisions
+L'analyse de séries temporelles est un outil central en économétrie pour comprendre et modéliser les fluctuations observées dans les données économiques et financières. Les modèles ARMA (AutoRegressive Moving Average) sont largement utilisés pour capturer les dynamiques temporelles, permettant d'expliquer les variations passées et de produire des prévisions sur des horizons courts. 
+
+Dans ce projet, nous décidons de chercher le modèle ARMA optimal d'une des deux séries : l'indice S&P 500 (dlSP500)
+
+L’objectif de cette étude est de déterminer si le modèle ARMA peut efficacement capturer les variations observées dans cette série temporelle. Nous effectuerons des tests statistiques, tels que les tests de stationnarité et les tests sur les résidus, pour valider la qualité du modèle. Enfin, nous examinerons les performances prédictives (calcul des prévisions) de ce modèle sur un horizon de prévision de 1 à 3 mois.
+
+
+## Choix et estimation du modèle
+Après que la série S&P 500 a été stationnarisée, cherchons le modèle ARMA satisfaisant les conditions de validité.
+La série initiale correspondant à l'indice correspond à un processus intégré d'ordre 1 DS. Ainsi, on va modéliser la variable en différence, qui correspond au processus filtré stationnaire associé.
+
+### \textbf{Choix du modèle}
+```{r, fig.width=7, fig.height=3, out.width='100%', fig.align='center'}
+par(mfrow = c(1, 2))
+acf(dlSP500, lag.max=20, main="Corrélogramme simple",col="blue")
+pacf(dlSP500, lag.max=20, main="Corrélogramme partiel",col="green")
+```
+
+En examinant attentivement les graphiques ACF et PACF, il est évident que le modèle le plus approprié pour décrire les dynamiques de ces données est un processus moyenne mobile, MA(1), puisque :
+
+--> Sur l'ACF, le premier retard montre une corrélation significative, tandis que les corrélations suivantes diminuent rapidement et oscillent autour de zéro. Ce comportement est caractéristique d'un modèle MA(1) (Moving Average d'ordre 1).
+
+--> Sur le PACF, les corrélations partielles décroissent également rapidement après le premier retard et oscillent ensuite autour de zéro.Cela confirme que le modèle le plus probable est un MA(1).
+
+Ainsi, les caractéristiques des correlogrammes indiquent que le modèle identifié est un MA(1). Si des tests supplémentaires ou des critères d'information (AIC, BIC) confirment ce choix, cela validerait le modèle.
+
+### \textbf{Balayage des critères d'information}
+```{r}
+mat_aic <- matrix(0,5,5) 
+mat_bic <- matrix(0,5,5)
+for (p in 0:4) {
+  for (q in 0:4) {
+    ARMA_pq <- Arima(y=dlSP500,order=c(p,0,q),method='ML')
+    mat_aic[p+1,q+1] <- ARMA_pq$aic
+    mat_bic[p+1,q+1] <- ARMA_pq$bic
+  }
+}
+rownames(mat_aic) <- c('p=0','p=1','p=2','p=3','p=4')
+colnames(mat_aic) <- c('q=0','q=1','q=2','q=3','q=4')
+rownames(mat_bic) <- c('p=0','p=1','p=2','p=3','p=4')
+colnames(mat_bic) <- c('q=0','q=1','q=2','q=3','q=4')
+
+print(mat_aic)
+print(mat_bic)
+```
+Commentaire :
+
+On identifie un modèle MA(1) à partir du critère BIC, et nous choisissons de retenir celui qui minimise ce critère, tout en ayant un AIC parmi les plus faibles. Ce choix s’accorde également avec l’analyse des corrélogrammes, qui confirme que le modèle MA(1) est approprié.
+
+### \textbf{Estimation du modèle MA(1)}
+```{r}
+MA1 <- Arima(y = dlSP500, order = c(0, 0, 1))
+summary(MA1)
+```
+### \textbf{Tests de validation du modèle}
+```{r}
+autoplot(MA1)
+```
+
+La commande autoplot reporte l'inverse des racines du polynome $\Phi(L)$. Il se situe bien à l'intérieur du disque unité complexe. Donc cela vérifie que le processus estimé est stationnaire.
+
+### Test de significativité sur les coefficients : 
+```{r}
+coeftest(MA1)
+```
+On remarque que le coefficients $\theta_1$ est significatif au seuil de 5%, tandis que la constance ne l'ai pas. Ainsi, on garde le coefficient ma1 et on retire la constante du modèle.
+
+Rajoutons un terme AR(1) et un terme MA(1) pour vérifier qu'ils ne sont pas signficatifs
+```{r}
+ARMA11 <- Arima(y=dlSP500,order=c(1,0,1),include.constant=FALSE) 
+coeftest(ARMA11)
+
+MA2 <- Arima(y = dlSP500, order = c(0, 0, 2),include.constant=FALSE)
+coeftest(MA2)
+```
+Commentaire :
+Le terme ar1 est significatif au seuil de 5% et le terme ma2 n'est pas significatif au seuil de 5%.
+Ainsi, dans ce qui suit nous allons retenir le modèle ARMA(1,1).
+
+
+###### \textcolor{red}{Test d'absence d'autocorrélation sur les résidus : Test de Ljung Box} 
+Les hypothèses du test sont les suivantes :
+$$
+\begin{cases} 
+H_0 : \rho_1 = \rho_2 = \dots = \rho_H = 0 \\
+H_1 : \exists j \in \{1, 2, \dots, H\} \ \text{tel que} \ \rho_j \neq 0
+\end{cases}
+$$
+
+```{r}
+checkresiduals(ARMA11,lags=10, plot=FALSE)
+```
+On remarque que p value = 42,2% > 5%. On ne rejette pas l'hypothèse nulle du test. Donc pas d'AR des résidus. Les rédidus ne sont pas autocorrélés.
+Les autocorrélations ne sont pas significatives individuellement au seuil de 5%. 
+
+###### \textcolor{red}{Test d'homoscedasticité sur les résidus : Test d'effets ARCH de Engle} 
+Les hypothèses du test sont les suivantes :
+$$
+\begin{cases} 
+H_0 : \alpha_1 = \cdots = \alpha_p = 0 \\
+H_1 : \overline{H_0}
+\end{cases}
+$$
+
+```{r}
+e <- ARMA11$residuals
+ArchTest(e,lags=6)
+```
+$$
+LM_{\text{obs}} = 18.721 > \chi^2_{6,0.95} = 12.592 \ \text{ou} \ p\text{-value} = 0.4662\% < 5\%
+$$
+Donc on rejette l'hypothèse nulle du test. Ainsi, il y a donc des effets ARCH d'ordre 6 sur les résidus. Donc les résidus ne sont pas homoscédastiques. Nous allons tenter de les corriger dans la suite de notre modèle.
+
+
+###### \textcolor{red}{Test de normalité des résidus : Test de Jarque Bera} 
+Les hypothèses du test sont les suivantes :
+$$
+\begin{cases} 
+H_0 : \text{Skewness} = 0 \ \text{et} \ \text{Kurtosis} = 3 \ \Rightarrow \epsilon_t \ \text{suit une loi normale} \\
+H_1 : \overline{H_0}
+\end{cases}
+$$
+```{r}
+jarque.bera.test(ARMA11$residuals)
+```
+$$
+JB_{\text{obs}} = 371.87 > \chi^2_{2,0.95} = 5.99 \ \text{ou} \ p\text{-value} \approx 0 < 5\%.
+$$
+Donc les résidus ne sont pas normalement distribués.
+
+Essayons de corriger la non-normalité des résidus en ajoutant des variables indicatrices. Deux approches seront testées.
+
+Dans un premier temps, nous introduirons une variable indicatrice pour capturer les "outliers", définis comme les résidus situés dans les extrêmes de leur distribution. Cette méthode vise à corriger les problèmes potentiels d'hétéroscédasticité et de non-normalité.
+
+Dans un second temps, nous tenterons de créer une indicatrice pour prendre en compte la crise financière de 2008.
+
+```{r}
+#{r}
+dates <- base1$period
+#Méthode 1 : Identification des résidus aux extrémités
+lower <- quantile(e, 0.05)  
+upper <- quantile(e, 0.95)  
+dum_outliers <- ifelse(e < lower | e > upper, 1, 0)
+ARMA11bis <- Arima(y = dlSP500, order = c(1, 0, 1), xreg = dum_outliers)
+# Vérification des coefficients
+coeftest(ARMA11bis)
+ebis <- ARMA11bis$residuals
+# Test de normalité (Jarque-Bera)
+jarque.bera.test(ebis)
+# Test ARCH (détection d'hétéroscédasticité)
+ArchTest(ebis, lags = 6)
+
+#Méthode 2 : Identification d'une période à exlure : (crise financière de 2008)
+dum_bulle <- ifelse((dates >= "2007-10" & dates <= "2009-06"),1,0)
+dum_bulle <- dum_bulle[-1]
+ARMA11ter <- Arima(y = dlSP500, order = c(1, 0, 1), xreg = dum_bulle)
+# Vérification des coefficients
+coeftest(ARMA11ter)
+eter <- ARMA11ter$residuals
+# Test de normalité (Jarque-Bera)
+jarque.bera.test(eter)
+# Test ARCH (détection d'hétéroscédasticité)
+ArchTest(eter, lags = 6)
+```
+Malgré notre approche avec des variables indicatrices (qui s'avèrne significatives) en utilisant deux méthodes, nous ne parvenons par à régler la non-normalité de nos résidus et les effets d'ARCH. Cela est typique des séries financières. Les résidus des séries financières ne suivent pas une distribution normale en raison de la présence de queues épaisses (fat tails), qui rendent les événements extrêmes plus probables. Ces résidus sont souvent asymétriques, reflétant des rendements non équilibrés entre gains et pertes. Enfin, les marchés sont affectés par des chocs soudains et irréguliers, éloignant les résidus de la normalité. Cela affectera notamment nos prévisions, car la non-normalité des résidus est une des hypothèses. Malgré cela nous allons passer à la prévision du modèle.
+
+
+
+## Prévision sur les horizons de 1 à 3 des prix du S&P500 (Modèle sans indicatrice)
+
+Nous allons dans un premier temps prévoir le processus différencié (dlSP500) sur la base du modèle estimé précédement, c'est à dire un ARMA(1,1).
+
+Une fois les prévisions sur ce processus sont effectuées, nous pourrons dans un second temps construire les prévisions du modèle initial du S&P 500.
+
+### \textbf{Prévisions du processus différencié}
+
+```{r}
+forecast_ARMA11<-forecast(ARMA11,h=3,level=95)
+forecast_ARMA11
+```
+
+```{r, include=FALSE}
+autoplot(forecast_ARMA11,main="Prévision du modèle sans indicatrice",xlab="Temps",ylab="Croissance du SP500")
+```
+À présent, calculons les prévisions à la main pour vérifier nos résultats :
+- Calcul de la prévision pour h=1. Nous avons le modèle suivant :
+$$
+dlSP500_t =  \phi \cdot  dlSP500_{t-1} + \theta \cdot \varepsilon_{t-1} + \varepsilon_t
+$$
+
+Avec les coefficients estimés par R :
+$$
+ \quad \phi = -0.4665, \quad \theta = 0.7150
+$$
+La prévision pour $h = 1$ est donnée par :
+$$
+\hat{Y}_T(1) = E(dlSP500_{T+1} \mid I_T) = \phi \cdot dlSP500_T + \theta \cdot E(\varepsilon_{T} \mid I_T)
+ + E(\varepsilon_{T+1} \mid I_T)
+$$ 
+Sachant que $E(\varepsilon_{T+1} \mid I_T) = 0$ (l'erreur est centrée) que $E(\varepsilon_{T} \mid I_T) = \varepsilon_T $ , nous avons :
+$$
+\hat{Y}_T(1) = \phi \cdot dlSP500_T + \theta \cdot \varepsilon_{T}
+$$
+Regardons les valeurs de $dlSP500_T$ en Décembre 2019  :
+```{r}
+tail(dlSP500)
+```
+
+On trouve les valeurs suivantes :
+$$
+dlSP500 \ (\text{Décembre 2019}) = \text0.022795533
+$$
+
+## Affichage des premières valeurs des résidus
+```{r}
+residuals <- ARMA11$residuals
+tail(residuals)
+```
+
+
+En remplaçant les valeurs de $dlSP500_T$ dans la formule, on obtient la prévision pour Janvier 2020 :
+$$
+\hat{Y}_{jan2020} = \hat{Y}_T(1) = -0.4665 * 0.022795533 +  0.7150 * 0.00468738 = -0.00728
+$$
+
+La prévision pour $h = 2$ est donnée par :
+$$
+\hat{Y}_T(2) =  \phi \cdot \hat{Y}_T(1) 
+$$
+En remplaçant les valeurs :
+$$
+\hat{Y}_{fev2020} = \hat{Y}_T(2) =  -0.4665 \cdot - 0.00728 = 0.003396
+$$
+La prévision pour $h = 3$ est donnée par :
+$$
+\hat{Y}_T(3) =  \phi \cdot \hat{Y}_T(2) 
+$$
+En remplaçant les valeurs :
+$$
+\hat{Y}_{mars2020} =\hat{Y}_T(3) =  -0.4665 \cdot 0.003396 = -0.001584
+$$
+Les prévisions du processus filtré calculées avec Forecast sont donc compatibles avec les prévisions du processus filtré calculées à la main.
+
+### \textbf{Prévisions du processus différencié}
+
+Une fois les prévisions du processus filtré calculées, on peut construire sur cette base les prévisions du processus initial.
+Revenons à un notre modèle non stationnaire, qui correspond à un processus DS, $X_T \sim I(1)$ :
+
+
+Le modèle DS non filtré est donné par :
+$$
+(1 - L) X_t = Y_t \quad \Leftrightarrow \quad X_t = Y_t + X_{t-1}
+$$
+
+Cela implique les relations suivantes pour les prévisions :
+$$
+\hat{X}_T(1) = \hat{Y}_T(1) + X_T
+$$
+$$
+\hat{X}_T(2) = \hat{Y}_T(2) + \hat{X}_T(1)
+$$
+$$
+\hat{X}_T(3) = \hat{Y}_T(3) + \hat{X}_T(2)
+$$
+Les prévisions filtrées sont :
+$$
+\hat{Y}_T(1) = -0.00728, \quad \hat{Y}_T(2) = 0.003396, \quad \hat{Y}_T(3) = -0.001584
+$$
+```{r}
+tail(lSP500)
+```
+La valeur initiale non filtrée (Décembre 2019) est :
+$$
+X_T = 8.064281
+$$
+Calcul des prévisions non filtrées :
+
+Pour $h=1$ :
+$$
+\hat{X}_T(1) = \hat{Y}_T(1) + X_T
+$$
+En remplaçant les valeurs :
+$$
+\hat{X}_T(1) = -0.00728 + 8.064281 = 8.057001
+$$
+Pour $h=2$ :
+$$
+\hat{X}_T(2) = \hat{Y}_T(2) + \hat{X}_T(1)
+$$
+En remplaçant les valeurs :
+$$
+\hat{X}_T(2) = 0.003396 + 8.057001 = 8.060397
+$$
+Pour $h=3$ :
+$$
+\hat{X}_T(3) = \hat{Y}_T(3) + \hat{X}_T(2)
+$$
+En remplaçant les valeurs :
+$$
+\hat{X}_T(3) = -0.001584 + 8.060397 = 8.058813
+$$
+$$
+\begin{array}{|c|c|c|c|}
+\hline
+\textbf{Mois} & \textbf{Réels (X)} & \textbf{Prévus ($X^{\wedge}$)} & \textbf{Erreur ($|X - X^{\wedge}|$)} \\
+\hline
+\text{Jan 2020} & 8,095 & 8,057 & 0,038 \\
+\hline
+\text{Fév 2020} & 8,096 & 8,060 & 0,036 \\
+\hline
+\text{Mar 2020} & 7,883 & 8,058 & 0,175 \\
+\hline
+\end{array}
+$$
+
+Sur les trois premiers mois de 2020, notre modèle ARMA produit des prévisions relativement proches des valeurs réelles pour janvier et février, avec des erreurs faibles. Cependant, en mars 2020, l'erreur augmente de manière significative. Cela pourrait s'expliquer par la survenue de la crise du COVID-19, un événement exogène et imprévisible à ce moment-là pour notre modèle. Pour mieux capturer l'effet de tels événements exogènes, nous pourrions envisager d'intégrer dans le modèle une indicatrice pour la crise Covid.
+
+\section*{\textbf{\textcolor{blue}{Modélisation multivariée}}}
+
+Alors que nous nous aventurons plus profondément dans les intrications de la finance et de l'économie, notre projet prend une tournure résolument multivariée. Nous vous invitons à explorer avec nous les interactions complexes et souvent subtiles entre deux piliers des marchés financiers : le prix de l’or et l’indice S&P 500.
+
+Avant de poursuivre, clarifions un point essentiel : lorsque nous parlons des séries temporelles du prix de l’or et du S&P 500, nous faisons référence à des données ajustées pour garantir leur stationnarité, un processus crucial pour rendre leur moyenne et leur variance constantes dans le temps. Ce voyage analytique nous est facilité par l’élégante structure d’un modèle vectoriel autorégressif (VAR).
+
+Imaginez ces deux séries temporelles comme des acteurs dans une danse économique complexe. Chaque mouvement, chaque variation est à la fois une réaction et une anticipation de l’autre. À travers le prisme du modèle VAR, nous allons décrypter cette relation dynamique, en examinant non seulement comment chaque série influence son propre avenir à travers ses retards, mais aussi comment elle prédit et est influencée par sa partenaire.
+
+La sélection méticuleuse de l’ordre du modèle VAR, guidée par des critères statistiques éprouvés, ouvrira la voie à une analyse causale de Granger. Cette approche nous permettra de répondre à des questions essentielles telles que : « Le prix de l’or réagit-il en tant qu’actif refuge face aux variations du S&P 500 ? » ou encore, « Le S&P 500 reflète-t-il les anticipations des investisseurs liées à la volatilité de l’or ? »
+
+Ensuite, grâce aux fonctions de réponse impulsionnelle, nous observerons les répercussions d’un choc inattendu dans une série sur l’autre, dessinant ainsi une cartographie des effets en cascade entre ces deux actifs. Et comme dans toute histoire financière, nous chercherons à comprendre les parts d’incertitude en analysant la décomposition de la variance de l’erreur de prévision. Cela nous révèlera la proportion de l’incertitude future du prix de l’or ou du S&P 500 pouvant être attribuée à des chocs passés de l’autre actif.
+
+Rejoignez-nous dans cette enquête économétrique qui, nous l’espérons, enrichira non seulement notre compréhension mais aussi notre appréciation des relations dynamiques qui régissent les marchés financiers. À travers cette étude, nous espérons offrir des éclairages pratiques pour les gestionnaires de portefeuille, les investisseurs et tous ceux qui cherchent à naviguer dans les eaux complexes de l’économie mondiale.
+
+## Estimation du VAR
+
+Dans cette partie, on ne considère que des processus stationnaires.
+L'estimation du VAR se fait équation par équation par la méthode des MCO ou par le maximum de vraisemblance.
+
+###### Choix du nombre de retards avec les critères d'information
+```{r}
+endogen <- ts.intersect(dlgold_prices, dlSP500) #concaténation sur une plage temporelle commune
+pselec <- VARselect(y=endogen, lag.max=6, type='none')
+pselec$criteria #affichage des valeurs des critères de sélection
+pselec$selection #nb de retards optimal selon les critères de sélection, on choisit l'ordre qui minimise les critères
+```
+On remarque que :
+- le critère AIC est minimum pour un retard de 1,
+- le critère HQ est minimum pour un retard de 1,
+- le critère SC est minimum pour un retard de 1,
+- le critère FPE est minimum pour un retard de 1
+Ainsi, on estime le modèle VAR avec p=1 retard.
+
+## Estimation du modèle VAR(1)
+```{r}
+VAR1 <- VAR(y=endogen, lag.max=1, type='none')
+coef(VAR1)
+```
+
+Vérifions que le VAR est bien stationnaire :
+```{r}
+roots(VAR1, modulus=TRUE)
+```
+Le module des inverses des racines du polynôme caractéristique vaut 0.236 et 0.109. Ces valeurs sont strictement inférieures à 1 ce qui signifie que notre modèle VAR est bien stationnaire.
+
+Vérifions à présent que les résidus ne sont pas autocorrélés :
+```{r}
+serial.test(VAR1, lags.pt=10, type="PT.adjusted") 
+```
+On remarque que la p-value = 0.0977 = 9.77% > 5%. Ainsi on ne rejette pas l'hypothèse nulle. Donc les résidus ne sont pas autocorrélés.
+
+
+### Commentaire :
+Les résultats du modèle VAR pour les séries stationnarisées du prix de l’or différencié (dlgold_prices) et des variations du S&P 500 (dlSP500) révèlent des différences marquantes dans l'impact des retards propres à chaque série. 
+
+Dans l'équation de dlgold_prices, le coefficient du retard propre (dlgold_prices.l1) est relativement faible (0.10558) et marginalement significatif avec une p-value de 0.0990. Cela indique une légère persistance dans les variations du prix de l’or, mais cet effet reste modéré. En revanche, le coefficient de (dlSP500.l1) dans la même équation est plus élevé (0.16005) et statistiquement significatif (p-value = 0.0303). Cela suggère que les variations passées du S&P 500 ont un impact notable sur les variations du prix de l’or, reflétant une interdépendance entre les deux marchés.
+
+Dans l'équation de dlSP500, le coefficient du retard propre (dlSP500.l1) est significatif avec une valeur élevée (0.239449) et une p-value très faible (0.0002), indiquant une forte persistance dans les variations du S&P 500. À l’inverse, le coefficient de (dlgold_prices.l1) est non significatif (p-value = 0.9594), ce qui montre que les variations passées du prix de l’or n’ont pas d’effet direct sur les variations actuelles du S&P 500.
+
+La matrice de corrélation des résidus indique une faible corrélation négative (-0.1238) entre les deux séries, suggérant que les chocs spécifiques aux marchés de l’or et du S&P 500 sont principalement indépendants l’un de l’autre.
+
+En somme, cette analyse montre que, bien que les variations du S&P 500 influencent significativement les variations du prix de l’or, l’inverse n’est pas vrai. De plus, chaque série conserve une dynamique interne distincte, avec une persistance plus marquée dans le S&P 500 que dans le prix de l’or. Ces résultats reflètent une interaction asymétrique entre les deux marchés financiers étudiés.
+
+## Tests de causalité au sens de Granger
+
+Causalité du prix de l'or sur l'indice S&P 500 :
+$$
+\text{Hypothèses du test d'absence de causalité :} 
+\begin{cases} 
+H_0 : a_{21} = 0 \quad \Rightarrow \quad \text{dlgold\_prices ne cause pas dlSP500}, \\ 
+H_1 : a_{21} \neq 0 \quad \Rightarrow \quad \text{dlgold\_prices cause dlSP500}.
+\end{cases}
+$$
+```{r}
+TC1 <- causality(VAR1, cause='dlgold_prices') 
+TC1$Granger
+```
+On remarque que p-value = 95.94% > 5%. On ne rejette donc pas l'hypothèse nulle au seuil 5%
+--> Le prix de l'or ne cause pas l'indice S&P 500.
+
+Causalité de l'indice S&P 500 sur le prix de l'or :
+$$
+\text{Hypothèses du test d'absence de causalité :} 
+\begin{cases} 
+H_0 : a_{12} = 0 \quad \Rightarrow \quad \text{dlSP500 ne cause pas dlgold\_prices}, \\ 
+H_1 : a_{12} \neq 0 \quad \Rightarrow \quad \text{dlSP500 cause dlgold\_prices}.
+\end{cases}
+$$
+```{r}
+TC2 <- causality(VAR1, cause='dlSP500') 
+TC2$Granger 
+```
+On remarque que p-value = 2.933% < 5%. On rejette donc l'hypothese nulle. 
+--> L'indice S&P 500 cause le prix de l'or.
+
+Conclusion générale :
+Les tests de causalité de Granger révèlent une relation dynamique asymétrique entre les variations logarithmiques de l'indice S&P 500 (dlSP500) et les variations logarithmiques des prix de l'or (dlgold_prices). Les résultats indiquent que les fluctuations des prix de l'or n'ont pas d'influence significative sur les variations du S&P 500, confirmant l'absence de causalité dans ce sens. En revanche, les fluctuations du S&P 500 exercent une influence significative sur les variations des prix de l'or, suggérant que les mouvements de l'indice S&P 500 jouent un rôle dans la détermination des variations des prix de l'or. Cela met en évidence une relation unidirectionnelle, où le S&P 500 impacte le marché de l'or, mais pas l'inverse.
+
+
+## Fonctions impulsion-réponse
+
+Les fonctions de réponse à l'impulsion, représentées dans les graphiques, permettent d'analyser l'impact d'un choc standardisé dans une série temporelle sur elle-même ainsi que sur l'autre série au fil du temps. Voici l'analyse pour chaque graphique en prenant en compte les deux variables, dlgold_prices et dlSP500, qui représentent respectivement les variations différenciées des prix de l’or et des variations du S&P 500 avant l’événement étudié. Ces réponses permettent de capturer les interactions dynamiques entre les deux marchés financiers et d'identifier la manière dont un choc affecte chaque variable individuellement et mutuellement au fil du temps.
+
+Justification du choix de l'ordre des variables dans la décomposition de Cholesky :
+D'après le cours, l'ordre des variables dans la décomposition de Choleski doit refléter leur degré d'indépendance causale, avec la variable la plus indépendante en premier et la plus dépendante en dernier. Dans notre cas, les tests de causalité ont montré que l'indice S&P 500 (dlSP500) n'est pas causé par les variations des prix de l'or (dlgold_prices), tandis que les prix de l'or sont influencés par le S&P 500. Par conséquent, dlSP500 est positionné en premier dans la décomposition, car il agit comme une variable exogène, tandis que dlgold_prices est placé en second, reflétant sa dépendance aux variations du S&P 500. Ce choix est également justifié économiquement, car le marché des actions influence souvent les marchés des actifs refuges comme l'or, mais l'inverse est moins fréquent.
+
+```{r}
+endogen <- ts.intersect(dlSP500, dlgold_prices)
+VAR1 <- VAR(y=endogen, type='none', lag.max=1)
+```
+
+## Calcul classique des fonctions de réponse (itération sur le VAR estimé)
+```{r}
+irf <- irf(VAR1, n.ahead = 12,ortho = TRUE, ci=0.95) 
+plot(irf)
+```
+
+Remarque : Les fonctions de réponse convergent vers 0, signe que le VAR est bien stationnaire.
+
+### Analyse des fonctions de réponse avec la méthode classique (méthode du VAR)
+
+Analyse du premier graphique (Orthogonal Impulse Response from dlSP500) :
+
+1. Réaction de dlSP500 à un choc dans dlSP500 : Le graphique montre qu’un choc dans dlSP500 entraîne une réponse initiale positive, qui décroît progressivement pour atteindre zéro à moyen terme. Cela signifie que les variations du S&P 500 sont autocorrélées à court terme mais n’ont pas de persistance significative à long terme. La dynamique positive initiale reflète l’impact immédiat d’un choc, probablement lié à la structure du marché du S&P 500, mais cet effet disparaît rapidement.
+2. Réaction de dlgold_prices à un choc dans dlSP500 : Un choc dans dlSP500 provoque une réponse initialement négative sur dlgold_prices. Cela indique que les variations du S&P 500 peuvent temporairement réduire les prix de l’or, ce qui pourrait refléter une dynamique de fuite des investisseurs des actifs refuges comme l’or vers des actifs plus risqués (comme les actions du S&P 500). Cependant, cette influence négative est temporaire, car la réponse retourne rapidement à zéro, indiquant que l’effet du S&P 500 sur l’or est transitoire et limité.
+
+Analyse du deuxième graphique (Orthogonal Impulse Response from dlgold_prices) :
+
+1. Réaction de dlSP500 à un choc dans dlgold_prices : La réponse de dlSP500 à un choc dans dlgold_prices est négligeable, avec des intervalles de confiance qui incluent constamment la ligne zéro. Cela suggère qu’un choc dans les prix de l’or n’a pas d’effet direct ni significatif sur les variations du S&P 500. Cette indépendance pourrait être liée à la nature différente des deux marchés (l’or étant souvent considéré comme un actif refuge, tandis que le S&P 500 représente un marché d’actions plus risqué).
+2. Réaction de dlgold_prices à un choc dans dlgold_prices : Un choc dans dlgold_prices génère une réponse initialement positive et significative, qui diminue rapidement avant de s’annuler à long terme. Cela reflète une autocorrélation à court terme dans les variations des prix de l’or, mais avec une dynamique de retour à la moyenne. Cette réponse montre que les ajustements du marché de l’or sont rapides et que l’impact des chocs ne persiste pas.
+
+Conclusion générale :
+Les tests de causalité ont montré que le S&P 500 cause les prix de l’or, une conclusion appuyée par les graphiques des fonctions de réponse. La réponse initiale négative des prix de l’or à un choc dans le S&P 500 indique qu’une hausse du S&P 500 peut entraîner une baisse temporaire des prix de l’or. Cette dynamique est probablement liée à des mouvements d’investissements entre actifs risqués (comme les actions du S&P 500) et refuges (comme l’or). Cependant, cet effet est transitoire, et la réponse des prix de l’or revient à zéro à moyen et long terme.
+Cette absence d’effet persistant soulève une contradiction apparente entre les résultats des tests de Granger et les IRF. Alors que les tests de Granger détectent une causalité dynamique globale sur l’ensemble des données, les IRF montrent que l’impact des chocs isolés est temporaire. Cette différence peut s’expliquer par les horizons temporels différents analysés par chaque méthode : les tests de Granger évaluent les relations sur une fenêtre temporelle étendue, tandis que les IRF se concentrent sur des réponses immédiates et localisées.
+Les fonctions de réponse révèlent également une asymétrie dans les relations entre ces deux marchés. Les variations différenciées des prix de l’or n’ont pas d’effet significatif sur le S&P 500, confirmant l’indépendance relative du marché des actions par rapport à celui de l’or. En revanche, les variations du S&P 500 influencent temporairement les prix de l’or, soulignant une influence unidirectionnelle et limitée.
+
+
+## Calcul des fonctions de réponse avec des projections locales
+```{r}
+irf_LP <- lp_lin(endog_data = as.data.frame(endogen),
+              lags_endog_lin = NaN,
+              lags_criterion = 'BIC',
+              max_lags = 6,
+              trend = 0,
+              shock_type = 0,
+              confint = 1.96,
+              hor = 12,
+              adjust_se=TRUE)
+plot(irf_LP)
+```
+
+### Analyse des fonctions de réponse avec la méthode des projections locales
+
+Les graphiques présentés sont des estimations de la fonction de réponse impulsionnelle (IRF) pour deux séries temporelles différenciées : dlSP500 (variations différenciées du S&P 500) et dlgold_prices (variations différenciées des prix de l'or). 
+
+Réponse de dlSP500 à un choc dans dlSP500 : Ce graphique montre la réaction de dlSP500 à un choc en lui-même. La réponse initiale est positive et forte, mais elle diminue rapidement au fil du temps pour osciller autour de zéro avant de s'éteindre. Cela indique une forte autocorrélation à court terme dans les variations différenciées du S&P 500, mais cet effet est transitoire et la série revient à sa moyenne à long terme.
+
+Réponse de dlgold_prices à un choc dans dlSP500 : Un choc dans dlSP500 a un impact initial positif sur dlgold_prices, ce qui est cohérent avec les résultats des tests de causalité de Granger indiquant que dlSP500 cause dlgold_prices. Cependant, cet effet décroît progressivement pour devenir statistiquement non significatif à long terme. Cela suggère que les variations différenciées du S&P 500 influencent temporairement les variations différenciées des prix de l’or, probablement en raison de facteurs liés à l'interconnexion des marchés financiers, mais cet impact ne persiste pas sur le long terme.
+
+Réponse de dlSP500 à un choc dans dlgold_prices : Ce graphique montre que la réaction de dlSP500 à un choc dans dlgold_prices est initialement proche de zéro et reste non significative tout au long de l’horizon temporel. Cela indique que les variations différenciées des prix de l’or n’ont pas d’effet notable sur les variations différenciées du S&P 500, confirmant l’indépendance dynamique entre ces deux séries.
+
+Réponse de dlgold_prices à un choc dans dlgold_prices : La réponse de dlgold_prices à un choc en lui-même est initialement forte et positive, mais décroît rapidement pour osciller autour de zéro. Cela suggère que les variations différenciées des prix de l’or présentent une autocorrélation notable à court terme, mais avec une dynamique de retour à la moyenne qui limite l’impact des chocs à long terme.
+
+Conclusion générale :
+Les fonctions de réponse impulsionnelle, combinées aux résultats des tests de causalité de Granger, montrent une relation asymétrique entre les deux séries. Les variations différenciées du S&P 500 (dlSP500) influencent significativement les variations différenciées des prix de l’or (dlgold_prices) à court terme, comme en témoigne une réponse initiale positive. Cependant, l’effet est transitoire et s’atténue rapidement. En revanche, il n’y a pas de preuve que les variations différenciées des prix de l’or influencent les variations différenciées du S&P 500. Ces résultats renforcent l’idée que le S&P 500 agit comme un moteur de dynamique sur les marchés financiers, tandis que le marché de l’or répond davantage à des impulsions externes sans affecter directement les indices boursiers.
+
+Comparaison des conclusions :
+Les deux méthodes (classique et projections locales) donnent des conclusions similaires :
+- Une forte autocorrélation transitoire dans dlSP500 et dlgold_prices.
+- dlSP500 influence dlgold_prices de manière limitée et transitoire, mais pas l’inverse.
+- Les chocs dans dlgold_prices ou dlSP500 n’ont pas d’effet durable ou significatif sur l’autre série.
+
+
+
+## Cointégration de Johansen
+Dans le cadre de notre analyse économétrique, nous avons déterminé que les séries étudiées, à savoir les prix de l'or 
+(lgold_prices) et l'indice S&P 500 (lSP500), sont toutes deux intégrées d'ordre un (I(1)). Cela signifie qu'elles ne sont pas stationnaires dans leurs niveaux, mais qu'elles deviennent stationnaires après différenciation première, ce qui donne naissance aux séries différenciées (dlgold_prices et dlSP500), ce que nous avons montré précedement.
+Cette caractéristique commune ouvre la voie à l'application potentielle des techniques de cointégration, qui reposent sur l'existence d'une relation de long terme entre des séries temporelles intégrées.
+
+La cointégration est une méthode particulièrement utile lorsque des séries I(1) présentent une tendance commune sur le long terme, malgré des fluctuations à court terme. Cette tendance partagée permet de modéliser les séries à travers des modèles à correction d'erreur, qui intègrent à la fois les dynamiques de court terme et la convergence vers un équilibre de long terme. Dans notre cas, l'existence de cette relation pourrait être vérifiée à travers des tests formels de cointégration, tels que le test de Johansen ou celui d’Engle-Granger.
+
+Si une relation de cointégration est établie entre lgold_prices et lSP500, cela indiquerait l'existence d'une tendance commune sous-jacente, malgré des variations distinctes à court terme. Cette relation permettrait d'utiliser des modèles à correction d'erreur, capables de capter les ajustements de court terme tout en respectant une convergence vers un équilibre de long terme.
+Dans notre cas, une relation de cointégration pourrait refléter une interaction structurelle entre les marchés boursiers et les prix de l’or, par exemple via des arbitrages entre actifs risqués (actions) et actifs refuges (or). En revanche, si aucune cointégration n’est détectée, cela signifierait que ces deux marchés évoluent de manière largement indépendante sur le long terme, bien qu’ils puissent être liés par des chocs transitoires ou des corrélations de court terme.
+
+Ainsi, l’identification ou l’absence de cointégration guidera la suite de l’analyse : si une relation de cointégration est confirmée, des modèles à correction d’erreur seront nécessaires pour modéliser la dynamique des séries. À défaut, des modèles VAR différenciés pourront être employés pour capturer les interactions entre dlgold_prices et 
+dlSP500. Cette distinction souligne l'importance d'une vérification préalable de la cointégration avant de choisir une méthodologie appropriée.
+
+Choix du retard p dans le VAR en niveau :
+```{r}
+endogen_co <- ts.intersect(lSP500 , lgold_prices)
+pselec <-VARselect(endogen_co, lag.max = 6, type = "none")
+pselec$selection # On prend 2 retards
+pniv <- 2
+```
+Sur la base des critères AIC, HQ et FPE, on retient 2 retards dans le VAR en niveau, soit 1 retard dans le VECM.
+
+### Test de cointégration de Johansen :
+
+Débutons la stratégie séquentielle :
+$$
+\text{Hypothèses du test de cointégration :}
+\begin{cases}
+H_0 : r = 0 \quad \Rightarrow \quad \text{Pas de relation de cointégration entre les séries}, \\
+H_1 : r > 0 \quad \Rightarrow \quad \text{Existence d'une ou plusieurs relations de cointégration}.
+\end{cases}
+$$
+```{r}
+test_coint <- ca.jo(endogen_co, ecdet = 'none', spec = 'transitory', type = 'trace', K = 2) 
+summary(test_coint)
+```
+On remarque que TR* = 6.52 et VC = 17.95. Donc comme TR* < VC, on ne rejette pas l'hypothèse nulle au seuil de 5%. Ainsi r=0 (le range de cointégration est nul) Comme nous ne pouvons pas rejeter l'hypothèse nulle, cela indique qu'il n'y a pas de relation de cointégration entre les séries. La stratégie séquentielle s'arrête ici.
+
+Conclusion :
+D'après le test de Johansen, il n'existe aucune relation de cointégration entre les séries analysées (lSP500 et lgold_prices). Les séries évoluent donc indépendamment sur le long terme.
+
+
+## Validation du modèle VAR :
+Nos séries lSP500 et lgold_prices ont été confirmées comme I(1) (intégrées d'ordre 1). Le test de cointégration de Johansen a montré qu'il n'existe aucune relation de cointégration.. Cela signifie qu'il n'y a pas de relation de long terme entre lSP500 et lgold_prices, comme spécifié dans nos tests précédents.
+Dans ce cas, le modèle VAR en différences premières est approprié. Ce modèle analyse les relations dynamiques entre les variations des séries entre dlSP500 et dlgold_prices.
+
+
+
+# CONCLUSION  : 
+
+À l'issue de notre exploration multivariée, nous avons pu approfondir la compréhension des dynamiques entre l'indice S&P 500 et les prix de l'or à travers diverses méthodes économétriques.
+
+Les tests de causalité de Granger ont révélé que l’indice S&P 500 cause les variations des prix de l’or, indiquant une relation unidirectionnelle où les fluctuations du marché boursier américain influencent temporairement le marché de l'or. Toutefois, l'absence de relation de causalité inverse suggère une indépendance relative des variations des prix de l’or sur les mouvements futurs du S&P 500.
+
+Les fonctions de réponse impulsionnelle ont confirmé l'existence d'une influence dynamique mais transitoire entre les deux séries. En particulier, un choc dans le S&P 500 provoque une réaction initiale dans les prix de l’or, bien que cet effet disparaisse à long terme. Cette dynamique peut être attribuée à une réallocation des capitaux entre actifs risqués (actions) et refuges (or), mais sans impact persistant.
+
+En ce qui concerne la cointégration, le test de Johansen n’a pas mis en évidence de relation de long terme entre les deux séries. Cela justifie l’utilisation d’un modèle VAR en différences premières, qui se concentre sur les relations dynamiques à court termes.
+
+En conclusion, cette étude multivariée met en lumière des interactions dynamiques et asymétriques entre l’indice S&P 500 et les prix de l’or. Bien qu’aucune relation de long terme n’ait été établie, les résultats indiquent une influence significative à court terme du S&P 500 sur l’or, ce qui ouvre la voie à de futures recherches intégrant des approches non linéaires ou des variables additionnelles pour mieux capturer la complexité des marchés financiers et des matières premières.
+
+Les hypothèses initiales sont partiellement vérifiées. Si l’influence unidirectionnelle du S&P 500 sur le prix de l’or est bien établie, l’effet refuge supposé de l’or en réponse à une baisse du S&P 500 n’est pas systématique ni persistant. L’absence d’impact significatif du prix de l’or sur le S&P 500 réfute une anticipation de risques traduite par le prix de l’or. Enfin, la relation globale entre les deux variables est dynamique mais non toujours négative, et semble fortement dépendre du contexte économique. Ces résultats éclairent les limites des hypothèses initiales et soulignent l’importance de facteurs contextuels dans les relations entre l’or et le marché boursier.
+
+
+\newpage
+
+
+
